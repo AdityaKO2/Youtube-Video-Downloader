@@ -3,11 +3,11 @@ from django.http import HttpResponse, StreamingHttpResponse
 import yt_dlp
 import os
 import tempfile
-
+import threading
 
 def home(request):
     return render(request, 'download_X/index.html')
-# Function to handle the video download and streaming
+
 def download_video(request, video_id):
     try:
         video_url = f"https://www.youtube.com/watch?v={video_id}"
@@ -21,24 +21,21 @@ def download_video(request, video_id):
             'outtmpl': '-',  # Direct output to standard output (memory)
         }
 
-        # Use yt-dlp to download and stream video
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info_dict = ydl.extract_info(video_url, download=True)
 
-            # Create a temporary file in memory to hold the video content
             with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
                 temp_file.write(ydl.download([video_url]))
 
-            # Function to read the file in chunks for streaming
             def file_iterator(file_name, chunk_size=8192):
                 try:
                     with open(file_name, 'rb') as f:
                         while chunk := f.read(chunk_size):
                             yield chunk
                 finally:
-                    os.remove(file_name)  # Ensure cleanup after streaming
+                    # Ensure cleanup after streaming is complete
+                    os.remove(file_name)
 
-            # Return the response for streaming the file
             response = StreamingHttpResponse(
                 file_iterator(temp_file.name),
                 content_type='video/mp4'
@@ -46,10 +43,15 @@ def download_video(request, video_id):
             response['Content-Disposition'] = f'attachment; filename="{info_dict["title"]}.mp4"'
             response['Content-Length'] = str(os.path.getsize(temp_file.name))
 
+            # Run cleanup in a background thread after streaming
+            threading.Thread(target=file_iterator, args=(temp_file.name,)).start()
+
             return response
 
     except Exception as e:
         return HttpResponse(f"An error occurred: {str(e)}", status=400)
+
+
 
 
 
