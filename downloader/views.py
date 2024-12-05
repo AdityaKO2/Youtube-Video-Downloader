@@ -12,19 +12,25 @@ import os
 import time
 from tempfile import NamedTemporaryFile
 
+
+import os
+
+youtube_cookies = os.environ.get('YOUTUBE_COOKIES')
+
+
+
 def download_video(request, video_id):
     try:
 
-        # Construct the YouTube video URL
         video_url = f"https://www.youtube.com/watch?v={video_id}"
 
-        # Set up yt-dlp options (you can modify these options as needed)
         ydl_opts = {
             'format': 'best',  # Download the best available quality
             'outtmpl': 'media/%(id)s.%(ext)s',  # Save to the 'downloads' folder with video ID as filename
             'noplaylist': True,  # Don't download playlists, only a single video
             'quiet': True,  # Disable unnecessary logs
-            'cookies_from_browser': True,
+            'cookies': youtube_cookies,  # Use the value here
+
         }
 
         # Use yt-dlp to download the video
