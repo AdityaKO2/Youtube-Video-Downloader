@@ -11,13 +11,13 @@ def home(request):
 def download_video(request, video_id):
     try:
         video_url = f"https://www.youtube.com/watch?v={video_id}"
-        youtube_cookies = os.environ.get('YOUTUBE_COOKIES')
+        # youtube_cookies = os.environ.get('YOUTUBE_COOKIES')
 
         ydl_opts = {
             'format': 'best',
             'noplaylist': True,
             'quiet': True,
-            'cookies': youtube_cookies,
+            'cookies': 'cookies.txt',
             'outtmpl': '-',  # Direct output to standard output (memory)
         }
 
