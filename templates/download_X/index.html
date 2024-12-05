@@ -167,59 +167,56 @@
         // Handle the form submission
         function handleFormSubmit(event) {
             event.preventDefault();
-
-            // Reset and show progress container
             const progressContainer = document.getElementById('progress-container');
             const progressBar = document.getElementById('progress-bar');
             const progressText = document.getElementById('progress-text');
-            progressContainer.style.display = 'block';
-            progressBar.style.width = '0%';
-            progressText.textContent = '0%';
-
-            // Hide alert message if video ID is valid
             const alertElement = document.getElementById('alert');
-            alertElement.style.display = 'none';
-
             const urlInput = document.getElementById('video_url');
-            let url = urlInput.value.trim();
+            const url = urlInput.value.trim();
             const videoID = extractVideoID(url);
-
+        
             if (videoID) {
-                // Simulate more realistic download progress
-                let progress = 0;
-                const downloadInterval = setInterval(() => {
-                    // Increase progress with a non-linear pattern
-                    if (progress < 30) {
-                        progress += Math.random() * 5;
-                    } else if (progress < 70) {
-                        progress += Math.random() * 3;
-                    } else if (progress < 95) {
-                        progress += Math.random() * 2;
+                // Make AJAX request to start the download on the server
+                fetch(`/download/${videoID}/`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Simulate a progress bar update
+                        let progress = 0;
+                        const downloadInterval = setInterval(() => {
+                            progress += Math.random() * 5;
+                            progress = Math.min(progress, 100);
+                            progressBar.style.width = `${progress}%`;
+                            progressText.textContent = `${Math.round(progress)}%`;
+        
+                            if (progress >= 100) {
+                                clearInterval(downloadInterval);
+                                window.location.href = data.downloadLink;  // Redirect when done
+                            }
+                        }, 200);
                     } else {
-                        progress += Math.random();
+                        throw new Error(data.message);
                     }
-
-                    // Ensure progress doesn't exceed 100
-                    progress = Math.min(progress, 100);
-                    
-                    progressBar.style.width = `${progress}%`;
-                    progressText.textContent = `${Math.round(progress)}%`;
-
-                    if (progress >= 100) {
-                        clearInterval(downloadInterval);
-                        setTimeout(() => {
-                            window.location.href = `/download/${videoID}/`;
-                        }, 500);
-                    }
-                }, 200);  // Faster update interval for smoother progression
+                })
+                .catch(error => {
+                    progressContainer.style.display = 'none';
+                    alertElement.textContent = `Error: ${error.message}`;
+                    alertElement.classList.add('alert-error');
+                    alertElement.style.display = 'block';
+                });
             } else {
-                // Show error message if URL is invalid
                 progressContainer.style.display = 'none';
                 alertElement.textContent = 'Invalid YouTube URL. Please enter a valid URL.';
                 alertElement.classList.add('alert-error');
                 alertElement.style.display = 'block';
             }
         }
+        
     </script>
 </body>
 </html>
