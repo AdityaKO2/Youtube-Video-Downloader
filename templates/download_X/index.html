@@ -176,39 +176,26 @@
             const videoID = extractVideoID(url);
         
             if (videoID) {
-                // Make AJAX request to start the download on the server
-                fetch(`/download/${videoID}/`, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
+                // Use WebSockets or SSE to listen for progress updates from the backend
+                const eventSource = new EventSource(`/progress/${videoID}/`);
+                eventSource.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    if (data.progress) {
+                        progressBar.style.width = `${data.progress}%`;
+                        progressText.textContent = `${Math.round(data.progress)}%`;
+                        if (data.progress >= 100) {
+                            eventSource.close();
+                            window.location.href = data.downloadLink;  // Redirect to download
+                        }
                     }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Simulate a progress bar update
-                        let progress = 0;
-                        const downloadInterval = setInterval(() => {
-                            progress += Math.random() * 5;
-                            progress = Math.min(progress, 100);
-                            progressBar.style.width = `${progress}%`;
-                            progressText.textContent = `${Math.round(progress)}%`;
-        
-                            if (progress >= 100) {
-                                clearInterval(downloadInterval);
-                                window.location.href = data.downloadLink;  // Redirect when done
-                            }
-                        }, 200);
-                    } else {
-                        throw new Error(data.message);
-                    }
-                })
-                .catch(error => {
+                };
+                eventSource.onerror = function(error) {
                     progressContainer.style.display = 'none';
                     alertElement.textContent = `Error: ${error.message}`;
                     alertElement.classList.add('alert-error');
                     alertElement.style.display = 'block';
-                });
+                    eventSource.close();
+                };
             } else {
                 progressContainer.style.display = 'none';
                 alertElement.textContent = 'Invalid YouTube URL. Please enter a valid URL.';
@@ -216,6 +203,7 @@
                 alertElement.style.display = 'block';
             }
         }
+        
         
     </script>
 </body>
