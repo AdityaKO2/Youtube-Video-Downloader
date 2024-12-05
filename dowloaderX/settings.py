@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-h*)8v@&0x-rki2cv08h0h)jsbew1f#17uulg92x@ws@&g$k5*$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["https://youtube-video-downloader-bbhj.onrender.com"]
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -118,7 +118,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR,'static')]
+STATIC_ROOT = os.path.join(BASE_DIR,'static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR,'media')
