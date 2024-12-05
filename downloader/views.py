@@ -24,6 +24,7 @@ def download_video(request, video_id):
             'outtmpl': 'media/%(id)s.%(ext)s',  # Save to the 'downloads' folder with video ID as filename
             'noplaylist': True,  # Don't download playlists, only a single video
             'quiet': True,  # Disable unnecessary logs
+            'cookies_from_browser': True,
         }
 
         # Use yt-dlp to download the video
