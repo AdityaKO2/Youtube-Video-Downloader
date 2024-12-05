@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-h*)8v@&0x-rki2cv08h0h)jsbew1f#17uulg92x@ws@&g$k5*$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["https://youtube-video-downloader-bbhj.onrender.com"]
 
 
 # Application definition
