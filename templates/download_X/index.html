@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video Downloader</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #FF0000;
+            --secondary-color: #282828;
+            --background-color: #f9f9f9;
+            --text-color: #030303;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 i {
+            margin-right: 10px;
+            color: var(--secondary-color);
+        }
+
+        .input-wrapper {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 15px 12px 40px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #d90000;
+        }
+
+        /* Progress Bar Styles */
+        .progress-container {
+            width: 100%;
+            background-color: #f0f0f0;
+            border-radius: 13px;
+            padding: 3px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 20px;
+            background-color: var(--primary-color);
+            border-radius: 10px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .progress-text {
+            margin-top: 10px;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .alert {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .alert-error {
+            background-color: #ffdddd;
+            color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1><i class="fab fa-youtube"></i>YouTube Video Downloader</h1>
+
+        <!-- Display alert message -->
+        <div id="alert" class="alert"></div>
+
+        <!-- Form for entering video URL -->
+        <form onsubmit="handleFormSubmit(event)">
+            <div class="input-wrapper">
+                <i class="fas fa-link"></i>
+                <input type="text" id="video_url" placeholder="Enter YouTube URL" required>
+            </div>
+            <button type="submit">
+                <i class="fas fa-download"></i> Download Video
+            </button>
+        </form>
+
+        <!-- Progress Bar -->
+        <div id="progress-container" class="progress-container">
+            <div id="progress-bar" class="progress-bar"></div>
+            <div id="progress-text" class="progress-text">0%</div>
+        </div>
+    </div>
+
+    <script>
+        // Extract YouTube video ID from URL
+        function extractVideoID(url) {
+            let videoID = '';
+            const regex = /(?:https?:\/\/(?:www\.)?youtube\.com\/(?:[^\/\n\s]*\/\S*\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+            const match = url.match(regex);
+            if (match) {
+                videoID = match[1];
+            }
+            return videoID;
+        }
+
+        // Handle the form submission
+        function handleFormSubmit(event) {
+            event.preventDefault();
+
+            // Reset and show progress container
+            const progressContainer = document.getElementById('progress-container');
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressText.textContent = '0%';
+
+            // Hide alert message if video ID is valid
+            const alertElement = document.getElementById('alert');
+            alertElement.style.display = 'none';
+
+            const urlInput = document.getElementById('video_url');
+            let url = urlInput.value.trim();
+            const videoID = extractVideoID(url);
+
+            if (videoID) {
+                // Simulate more realistic download progress
+                let progress = 0;
+                const downloadInterval = setInterval(() => {
+                    // Increase progress with a non-linear pattern
+                    if (progress < 30) {
+                        progress += Math.random() * 5;
+                    } else if (progress < 70) {
+                        progress += Math.random() * 3;
+                    } else if (progress < 95) {
+                        progress += Math.random() * 2;
+                    } else {
+                        progress += Math.random();
+                    }
+
+                    // Ensure progress doesn't exceed 100
+                    progress = Math.min(progress, 100);
+                    
+                    progressBar.style.width = `${progress}%`;
+                    progressText.textContent = `${Math.round(progress)}%`;
+
+                    if (progress >= 100) {
+                        clearInterval(downloadInterval);
+                        setTimeout(() => {
+                            window.location.href = `/download/${videoID}/`;
+                        }, 500);
+                    }
+                }, 200);  // Faster update interval for smoother progression
+            } else {
+                // Show error message if URL is invalid
+                progressContainer.style.display = 'none';
+                alertElement.textContent = 'Invalid YouTube URL. Please enter a valid URL.';
+                alertElement.classList.add('alert-error');
+                alertElement.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
