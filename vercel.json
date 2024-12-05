@@ -6,6 +6,9 @@
       "use": "@vercel/python"
     }
   ],
+  "env": {
+    "DJANGO_SETTINGS_MODULE": "dowloaderX.settings"
+  },
   "routes": [
     {
       "src": "/(.*)",
