@@ -17,7 +17,7 @@ def download_video(request, video_id):
             'format': 'best',
             'noplaylist': True,
             'quiet': True,
-            'cookies': 'cookies.txt',
+            'cookiefile': 'cookies.txt',
             'outtmpl': '-',  # Direct output to standard output (memory)
         }
 
